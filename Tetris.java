@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Tetris extends JFrame {
     /**
-	 * @Author ... rodomod
+	 * @Author ... rodomod ...
 	 */
 	
 	final String TITLE_OF_PROGRAM = "Tetris";
