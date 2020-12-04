@@ -11,19 +11,19 @@ import javax.swing.JPanel;
 
 public class Tetris extends JFrame {
     final String Title = "Tetris";
-    final int blsize = 25;   //размер одного блока
+    final int blockSize = 25;   //размер одного блока
     final int ARC = 6;      //радиус закругления блока
     final int stakan_WIDTH = 10;    //размер игрового поля в блоке  width
     final int stakan_HEIGHT = 21;  //размер игрового поля в блоке  height
-    final int Location = 180;     //стартовая локация
+    final int startLocation = 180;     //стартовая локация
     final int DX = 7;     //определено экспериментально
     final int DY = 26;  //определено экспериментально
     final int LEFT = 37;      //коды клавиш
     final int UP = 38;       //коды клавиш
     final int RIGHT = 39;  //коды клавиш
     final int DOWN = 40;  //коды клавиш
-    final int SHOW_DEL = 400;    //задержка анимации
-    final int[][][] figr = {
+    final int showDel = 400;    //задержка анимации
+    final int[][][] point = {
             {{0,0,0,0}, {1,1,1,1}, {0,0,0,0}, {0,0,0,0}, {4, 0x00f0f0}}, // I
             {{0,0,0,0}, {0,1,1,0}, {0,1,1,0}, {0,0,0,0}, {4, 0xf0f000}}, // O
             {{1,0,0,0}, {1,1,1,0}, {0,0,0,0}, {0,0,0,0}, {3, 0x0000f0}}, // J
@@ -55,12 +55,13 @@ public class Tetris extends JFrame {
             {0,1,1,0,0,1,0,0,0,0,0,1,1,0,0,1,0,0,1,0}};
 
     public static void main(String[] args) {
+        
         new Tetris().init();
     }
     Tetris(){
         setTitle(Title);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setBounds(Location, Location, stakan_WIDTH * blsize + DX, stakan_HEIGHT * blsize + DY);
+        setBounds(startLocation, startLocation, stakan_WIDTH * blockSize + DX, stakan_HEIGHT * blockSize + DY);
         setResizable(false);
         setLocationRelativeTo(null);           //игра в центре экрана
         canvas.setBackground(Color.black);  // определить цвет фона
@@ -78,20 +79,21 @@ public class Tetris extends JFrame {
         setVisible(true);
         Arrays.fill(stakan[stakan_HEIGHT], 1);   //инициализация дна стакана...создаём площадку дна
     }
-    void init() {               //основной цикл игры
-        while(!gameOver) {  // пока не геймОвер(!gameOver) крутится цикл while
-            try {             //три строки обеспечивают задержку(sleep)перед прорисовкой...
-                Thread.sleep(SHOW_DEL);
+    void init() {
+        while(!gameOver) {  // пока неГеймОвер крутится цикл while(!gameOver)
+            try {          //три строки обеспечивают задержку(sleep)анимации...перед прорисовкой
+                Thread.sleep(showDel);
             } catch (Exception e) { e.printStackTrace(); }
-            canvas.repaint();   //перерисовка окна
+            canvas.repaint();   //перерисовка
             checkFilling();    //проверка заполнения строк
-            if(figure.isTouchGround()) {     //проверяем коснулась ли фигура дна или упавших фигур
-                figure.leaveOnTheGround();  //фиксируем(изменяем цвет) на дне после касания с дном или другой фигурой
-                figure = new Figure();        //создаем новую фигуру
-                gameOver = figure.isCrossGround(); //проверяем  фигура пересеклась с дном или другой фигурой?
-                // Есть ли место для новой фигуры?->тоесть не закончилась ли игра
-            } else
-                figure.stepDown();      //если фигура не коснулась то она продолжает падать
+            if(figure.isTouchGroundWell()) { // коснулась ли фигура дна или упавших фигур
+                figure.fixToWell();         //фиксируем(изменяем цвет) после касания
+                figure = new Figure();     //создаем новую фигуру
+                gameOver = figure.isCrossGroundWell(); //Есть ли пространство для новой фигуры?тоесть не закончилась ли игра
+
+            } else {
+                figure.stepDown(); //фигура продолжает падать
+            }
         }
     }
     void checkFilling() {        //проверка заполнения строк
@@ -114,33 +116,33 @@ public class Tetris extends JFrame {
     }
     class Figure {
         private ArrayList<Block> figure = new ArrayList<Block>();
-        private int[][] shape = new int[4][4];
+        private int[][] well = new int[4][4];
         private int type, size, color;
         private int x = 3, y = 0;   //начало в левом верхнем углу
 
         Figure() {
-            type = random.nextInt(figr.length);
-            size = figr[type][4][0];
-            color = figr[type][4][1];
+            type = random.nextInt(point.length);
+            size = point[type][4][0];
+            color = point[type][4][1];
             if(size == 4) y = -1;
             for(int i = 0; i < size; i++)
-                System.arraycopy(figr[type][i], 0, shape[i], 0, figr[type][i].length);
-            createFromShape();
+                System.arraycopy(point[type][i], 0, well[i], 0, point[type][i].length);
+            createWell();
         }
-        void createFromShape() {  //создать из формы ...
+        void createWell() {  //создать из формы ...
             for(int x = 0; x < size; x++)
-                for(int y = 0; y < size; y++)  //проходим по массиву shape и создаём нашу фигуру->
-                    if(shape[y][x] == 1) figure.add(new Block(x + this.x, y + this.y));
+                for(int y = 0; y < size; y++)  //проходим по массиву well и создаём нашу фигуру
+                    if(well[y][x] == 1) figure.add(new Block(x + this.x, y + this.y));
         }
-        boolean isTouchGround() { //коснулась ли фигура дна или упавших фигур
+        boolean isTouchGroundWell() { //коснулась ли фигура дна
             for(Block block : figure) if(stakan[block.getY() + 1][block.getX()] > 0) return true;
             return false;
         }
-        boolean isCrossGround() { //есть ли фиксация дна стакана?
+        boolean isCrossGroundWell() { //есть ли пространство для новой фигуры?
             for(Block block : figure) if(stakan[block.getY()][block.getX()] > 0) return true;
             return false;
         }
-        void leaveOnTheGround() {  //изменение цвета фигуры при фиксации дна стакана
+        void fixToWell() {  //изменение цвета фигуры при фиксации
 
             for(Block block : figure) stakan[block.getY()][block.getX()] = color;
         }
@@ -164,42 +166,42 @@ public class Tetris extends JFrame {
         }
         void drop() { // быстрое падение в низ стакана
 
-            while(!isTouchGround()) stepDown();
+            while(!isTouchGroundWell()) stepDown();
         }
-        boolean isWrongPosition() { // /**проверка на выход за пределы стакана(коллизии вращения фигуры)*/
+        boolean collidesAt() { // /**проверка на выход за пределы стакана(коллизии вращения фигуры)*/
             for(int x = 0; x < size; x++)
                 for(int y = 0; y < size; y++)
-                    if(shape[y][x] == 1) {
+                    if(well[y][x] == 1) {
                         if(y + this.y < 0) return true;
                         if(x + this.x < 0 || x + this.x > stakan_WIDTH - 1) return true;
                         if(stakan[y + this.y][x + this.x] > 0) return true;
                     }
             return false;
         }
-        void rotateShape(int direction) { // ротация
+        void rotateWell(int ir) { // ротация
             for(int i = 0; i < size/2; i++)
                 for(int j = i; j < size-1-i; j++)
-                    if(direction == RIGHT) {    //по часовой стрелке
-                        int tmp = shape[size-1-j][i];
-                        shape[size-1-j][i] = shape[size-1-i][size-1-j];
-                        shape[size-1-i][size-1-j] = shape[j][size-1-i];
-                        shape[j][size-1-i] = shape[i][j];
-                        shape[i][j] = tmp;
+                    if(ir == RIGHT) {    //по часовой стрелке
+                        int tmp = well[size-1-j][i];
+                        well[size-1-j][i] = well[size-1-i][size-1-j];
+                        well[size-1-i][size-1-j] = well[j][size-1-i];
+                        well[j][size-1-i] = well[i][j];
+                        well[i][j] = tmp;
                     } else {    //против часовой стрелки
-                        int tmp = shape[i][j];
-                        shape[i][j] = shape[j][size-1-i];
-                        shape[j][size-1-i] = shape[size-1-i][size-1-j];
-                        shape[size-1-i][size-1-j] = shape[size-1-j][i];
-                        shape[size-1-j][i] = tmp;
+                        int tmp = well[i][j];
+                        well[i][j] = well[j][size-1-i];
+                        well[j][size-1-i] = well[size-1-i][size-1-j];
+                        well[size-1-i][size-1-j] = well[size-1-j][i];
+                        well[size-1-j][i] = tmp;
                     }
         }
         void rotate() {    //вращение фигуры  ротация
-            rotateShape(RIGHT);
-            if(!isWrongPosition()) {
+            rotateWell(RIGHT);
+            if(!collidesAt()) {
                 figure.clear();
-                createFromShape();
+                createWell();
             } else
-                rotateShape(LEFT);
+                rotateWell(LEFT);
         }
         void paint(Graphics g) {
 
@@ -222,7 +224,7 @@ public class Tetris extends JFrame {
 
         void paint(Graphics g, int color) {
             g.setColor(new Color(color));
-            g.drawRoundRect(x* blsize +1, y* blsize +1, blsize -2, blsize -2, ARC, ARC);
+            g.drawRoundRect(x* blockSize +1, y* blockSize +1, blockSize -2, blockSize -2, ARC, ARC);
         }
     }
     class Canvas extends JPanel {      // холст для рисования
@@ -233,12 +235,12 @@ public class Tetris extends JFrame {
                 for(int y = 0; y < stakan_HEIGHT; y++) {
                     if(x < stakan_WIDTH - 1 && y < stakan_HEIGHT - 1) {
                         g.setColor(Color.lightGray);
-                        g.drawLine((x+1)* blsize -2, (y+1)* blsize, (x+1)* blsize +2, (y+1)* blsize);
-                        g.drawLine((x+1)* blsize, (y+1)* blsize -2, (x+1)* blsize, (y+1)* blsize +2);
+                        g.drawLine((x+1)* blockSize -2, (y+1)* blockSize, (x+1)* blockSize +2, (y+1)* blockSize);
+                        g.drawLine((x+1)* blockSize, (y+1)* blockSize -2, (x+1)* blockSize, (y+1)* blockSize +2);
                     }
                     if(stakan[y][x] > 0) {
                         g.setColor(new Color(stakan[y][x]));
-                        g.fill3DRect(x* blsize +1, y* blsize +1, blsize -1, blsize -1, true);
+                        g.fill3DRect(x* blockSize +1, y* blockSize +1, blockSize -1, blockSize -1, true);
                     }
                 }
             if(gameOver) {
