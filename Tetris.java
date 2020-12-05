@@ -39,20 +39,21 @@ public class Tetris extends JFrame {
     Canvas canvas = new Canvas();
     Random random = new Random();
     Figure figure = new Figure();
-    boolean gameOver = false;
+    boolean overGame = false;
     final int[][] MSG = {
+            {0,1,1,0,0,1,0,0,1,0,0,1,1,0,0,1,1,1,0,0},
+            {1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0},
+            {1,0,0,1,0,1,0,1,0,0,1,1,1,1,0,1,1,1,0,0},
+            {1,0,0,1,0,1,1,0,0,0,1,0,0,0,0,1,0,0,1,0},
+            {0,1,1,0,0,1,0,0,0,0,0,1,1,0,0,1,0,0,1,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,0,0,1,1,0},
             {1,0,0,0,0,1,0,0,1,0,1,0,1,0,1,0,1,0,0,1},
             {1,0,1,1,0,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1},
             {1,0,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,0,0},
             {0,1,1,0,0,1,0,0,1,0,1,0,1,0,1,0,0,1,1,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,1,1,0,0,1,0,0,1,0,0,1,1,0,0,1,1,1,0,0},
-            {1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0},
-            {1,0,0,1,0,1,0,1,0,0,1,1,1,1,0,1,1,1,0,0},
-            {1,0,0,1,0,1,1,0,0,0,1,0,0,0,0,1,0,0,1,0},
-            {0,1,1,0,0,1,0,0,0,0,0,1,1,0,0,1,0,0,1,0}};
+            };
 
     public static void main(String[] args) {
 
@@ -67,7 +68,7 @@ public class Tetris extends JFrame {
         canvas.setBackground(Color.black); // определить цвет фона
         addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
-                if(!gameOver) {
+                if(!overGame) {
                     if(e.getKeyCode() == DOWN) figure.drop();
                     if(e.getKeyCode() == UP) figure.rotate();
                     if(e.getKeyCode() == LEFT || e.getKeyCode() == RIGHT) figure.move(e.getKeyCode());
@@ -80,7 +81,7 @@ public class Tetris extends JFrame {
         Arrays.fill(stakan[stakan_HEIGHT], 1);   //инициализация дна стакана...создаём площадку дна
     }
     void init() {
-        while(!gameOver) {  // пока неГеймОвер крутится цикл while(!gameOver)
+        while(!overGame) {  // пока неОверГейм крутится цикл while(!overGame)
             try {          //три строки обеспечивают задержку(sleep)анимации...перед прорисовкой
                 Thread.sleep(showDel);
             } catch (Exception e) { e.printStackTrace(); }
@@ -89,7 +90,7 @@ public class Tetris extends JFrame {
             if(figure.isTouchToWell()) { // коснулась ли фигура дна или упавших фигур
                 figure.fixToWell();         //фиксируем(изменяем цвет) после касания
                 figure = new Figure();     //создаем новую фигуру
-                gameOver = figure.isCrossToWell(); //Есть ли пространство для новой фигуры?тоесть не закончилась ли игра
+                overGame = figure.isCrossToWell(); //Есть ли пространство для новой фигуры?тоесть не закончилась ли игра
 
             } else {
                 figure.isCrossDown(); //фигура продолжает падать
@@ -208,7 +209,7 @@ public class Tetris extends JFrame {
             for(Block block : figure) block.paint(g, color);
         }
     }
-    class Block {   //Блок -- строительный элемент для рисунка
+    class Block {   //блок -- строительный элемент для рисунка
         private int x, y;
 
         public Block(int x, int y) {
@@ -243,7 +244,7 @@ public class Tetris extends JFrame {
                         g.fill3DRect(x* blockSize +1, y* blockSize +1, blockSize -1, blockSize -1, true);
                     }
                 }
-            if(gameOver) {
+            if(overGame) {
                 g.setColor(Color.white);
                 for(int y = 0; y < MSG.length; y++)
                     for(int x = 0; x < MSG[y].length; x++)
