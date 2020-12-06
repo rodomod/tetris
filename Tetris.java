@@ -107,8 +107,9 @@ public class Tetris extends JFrame {
             if(curent > 0) {
                 curentHeight++;
                 for(int i = height; i > 0; i--) System.arraycopy(stakan[i-1], 0, stakan[i], 0, stakan_WIDTH);
-            } else
+            } else {
                 height--;
+            }
         }
         if(curentHeight > 0) {
             gameScore += score[curentHeight - 1];
@@ -201,8 +202,9 @@ public class Tetris extends JFrame {
             if(!collidesAt()) {
                 figure.clear();
                 createWell();
-            } else
+            } else {
                 rotateWell(LEFT);
+            }
         }
         void paint(Graphics g) {
 
@@ -249,8 +251,9 @@ public class Tetris extends JFrame {
                 for(int y = 0; y < MSG.length; y++)
                     for(int x = 0; x < MSG[y].length; x++)
                         if(MSG[y][x] == 1) g.fill3DRect(x*11+18, y*11+160, 10, 10, true);
-            } else
+            } else {
                 figure.paint(g);
+            }
         }
     }
 }
