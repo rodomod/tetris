@@ -8,21 +8,20 @@ import java.util.Arrays;
 import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
 public class Tetris extends JFrame {
     final String Title = "Tetris";
-    final int boxSize = 25;  //размер одного блока
+    final int BOX_SIZE = 25;  //размер одного блока
     final int ARC = 6;      //радиус закругления блока
-    final int form_WIDTH = 10;   //размер игрового поля  width
-    final int form_HEIGHT = 21; //размер игрового поля height
-    final int start = 180;     //стартовая локация
+    final int FORM_WIDTH = 10;   //размер игрового поля  width
+    final int FORM_HEIGHT = 21; //размер игрового поля height
+    final int RUN = 180;     //стартовая локация
     final int DX = 7;         //new X
     final int DY = 26;       //new Y
     final int LEFT = 37;    //коды клавиш 
     final int UP = 38;     //коды клавиш 
     final int RIGHT = 39; //коды клавиш
     final int DOWN = 40; //коды клавиш
-    final int showDel = 400;    //задержка анимации
+    final int SHOW_DEL = 400;    //задержка анимации
     final int[][][] dot = {
             {{0,0,0,0}, {1,1,1,1}, {0,0,0,0}, {0,0,0,0}, {4, 0x00f0f0}}, // I
             {{0,0,0,0}, {0,1,1,0}, {0,1,1,0}, {0,0,0,0}, {4, 0xf0f000}}, // O
@@ -34,7 +33,7 @@ public class Tetris extends JFrame {
     };
     final int[] score = {155,355,755,1555};
     int gameScore = 0;
-    int[][] form = new int[form_HEIGHT + 1][form_WIDTH];  // игровое поле form
+    int[][] form = new int[FORM_HEIGHT + 1][FORM_WIDTH];  // игровое поле form
     JFrame frame;
     Canvas canvas = new Canvas();
     Random random = new Random();
@@ -62,11 +61,12 @@ public class Tetris extends JFrame {
     Tetris(){
         setTitle(Title);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setBounds(start, start, form_WIDTH * boxSize + DX, form_HEIGHT * boxSize + DY);
+        setBounds(RUN, RUN, FORM_WIDTH * BOX_SIZE + DX, FORM_HEIGHT * BOX_SIZE + DY);
         setResizable(false);                 //не изменять размер игрового поля
         setLocationRelativeTo(null);        //игра в центре экрана
         canvas.setBackground(Color.black); //цвет фона
         addKeyListener(new KeyAdapter() {
+            @Override
             public void keyPressed(KeyEvent e) {
                 if(!overGame) {
                     if(e.getKeyCode() == DOWN) figure.drop();
@@ -78,13 +78,13 @@ public class Tetris extends JFrame {
         });
         add(BorderLayout.CENTER, canvas);
         setVisible(true);
-        Arrays.fill(form[form_HEIGHT], 1); //инициализация дна...создаём площадку дна
+        Arrays.fill(form[FORM_HEIGHT], 1); //инициализация дна...создаём площадку дна
     }
     void init() {
         while(!overGame) {  // пока неОверГейм(!overGame) крутится цикл while
             try {          // задержка анимации...перед перерисовкой
-                Thread.sleep(showDel);
-            } catch (Exception e) { e.printStackTrace(); }
+               Thread.sleep(SHOW_DEL);
+            } catch (InterruptedException e) {}
             canvas.repaint();   //перерисовка
             curentString();    //проверка заполнения строк
             if(figure.touchToWell()) { // коснулась ли фигура дна или упавших фигур
@@ -98,15 +98,15 @@ public class Tetris extends JFrame {
         }
     }
     void curentString() {        //проверка заполнения строк
-        int height = form_HEIGHT - 1;
+        int height = FORM_HEIGHT - 1;
         int curentHeight = 0;
         while (height > 0) {
             int curent = 1;
-            for(int width = 0; width < form_WIDTH; width++)
+            for(int width = 0; width < FORM_WIDTH; width++)
                 curent *= Integer.signum(form[height][width]);
             if(curent > 0) {
                 curentHeight++;
-                for(int i = height; i > 0; i--) System.arraycopy(form[i-1], 0, form[i], 0, form_WIDTH);
+                for(int i = height; i > 0; i--) System.arraycopy(form[i-1], 0, form[i], 0, FORM_WIDTH);
             } else {
                 height--;
             }
@@ -116,10 +116,10 @@ public class Tetris extends JFrame {
             setTitle(Title + " : " + gameScore);
         }
     }
-    class Figure {
-        private ArrayList<Box> figure = new ArrayList<Box>();
-        private int[][] well = new int[4][4];
-        private int type, size, color;
+    final class Figure {
+        private final ArrayList<Box> figure = new ArrayList<Box>();
+        private final int[][] well = new int[4][4];
+        private final int type, size, color;
         private int x = 3, y = 0;   //начало в левом верхнем углу
 
         Figure() {
@@ -151,7 +151,7 @@ public class Tetris extends JFrame {
         boolean widthToWell(int col) {  //проверка на косание фигурой стены LEFT,RIGHT...
             for(Box box : figure) {
                 if(col == LEFT && (box.getX() == 0 || form[box.getY()][box.getX() - 1] > 0)) return true;
-                if(col == RIGHT && (box.getX() == form_WIDTH - 1 || form[box.getY()][box.getX() + 1] > 0)) return true;
+                if(col == RIGHT && (box.getX() == FORM_WIDTH - 1 || form[box.getY()][box.getX() + 1] > 0)) return true;
             }
             return false;
         }
@@ -175,7 +175,7 @@ public class Tetris extends JFrame {
                 for(int y = 0; y < size; y++)
                     if(well[y][x] == 1) {
                         if(y + this.y < 0) return true;
-                        if(x + this.x < 0 || x + this.x > form_WIDTH - 1) return true;
+                        if(x + this.x < 0 || x + this.x > FORM_WIDTH - 1) return true;
                         if(form[y + this.y][x + this.x] > 0) return true;
                     }
             return false;
@@ -211,7 +211,7 @@ public class Tetris extends JFrame {
             for(Box box : figure) box.paint(g, color);
         }
     }
-    class Box { 
+    final class Box { 
         private int x, y;
 
         public Box(int x, int y) {
@@ -227,23 +227,23 @@ public class Tetris extends JFrame {
 
         void paint(Graphics g, int color) {
             g.setColor(new Color(color));
-            g.drawRoundRect(x* boxSize +1, y* boxSize +1, boxSize -2, boxSize -2, ARC, ARC);
+            g.drawRoundRect(x* BOX_SIZE +1, y* BOX_SIZE +1, BOX_SIZE -2, BOX_SIZE -2, ARC, ARC);
         }
     }
     class Canvas extends JPanel {     
         @Override
         public void paint(Graphics g) {
             super.paint(g);
-            for(int x = 0; x < form_WIDTH; x++)
-                for(int y = 0; y < form_HEIGHT; y++) {
-                    if(x < form_WIDTH - 1 && y < form_HEIGHT - 1) {
+            for(int x = 0; x < FORM_WIDTH; x++)
+                for(int y = 0; y < FORM_HEIGHT; y++) {
+                    if(x < FORM_WIDTH - 1 && y < FORM_HEIGHT - 1) {
                         g.setColor(Color.lightGray);
-                        g.drawLine((x+1)* boxSize -2, (y+1)* boxSize, (x+1)* boxSize +2, (y+1)* boxSize);
-                        g.drawLine((x+1)* boxSize, (y+1)* boxSize -2, (x+1)* boxSize, (y+1)* boxSize +2);
+                        g.drawLine((x+1)* BOX_SIZE -2, (y+1)* BOX_SIZE, (x+1)* BOX_SIZE +2, (y+1)* BOX_SIZE);
+                        g.drawLine((x+1)* BOX_SIZE, (y+1)* BOX_SIZE -2, (x+1)* BOX_SIZE, (y+1)* BOX_SIZE +2);
                     }
                     if(form[y][x] > 0) {
                         g.setColor(new Color(form[y][x]));
-                        g.fill3DRect(x* boxSize +1, y* boxSize +1, boxSize -1, boxSize -1, true);
+                        g.fill3DRect(x* BOX_SIZE +1, y* BOX_SIZE +1, BOX_SIZE -1, BOX_SIZE -1, true);
                     }
                 }
             if(overGame) {
