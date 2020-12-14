@@ -168,7 +168,9 @@ public class Tetris extends JFrame {
         }
         void drop() { // падение в низ
 
-            while(!touchToWell()) crossDown();
+            while(!touchToWell()){
+				crossDown();
+			}
         }
         boolean collidesAt() { //(коллизии вращения фигуры)при проверке косания со стеной
             for(int x = 0; x < size; x++)
