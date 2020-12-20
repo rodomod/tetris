@@ -1,17 +1,14 @@
-package src;
-
 import java.awt.Graphics;
 import java.util.ArrayList;
 
 final class Figure {
-
-   private final int[][] well = new int[4][4];
    private final ArrayList<Box> figure = new ArrayList<Box>();
+   private final int[][] well = new int[4][4];
    private final int type;
    private final int size;
    private final int color;
-   private int y = 0;
    private int x = 3;
+   private int y = 0; //начало в левом верхнем углу
    private final Tetris outer;
 
    Figure(final Tetris outer) {
@@ -22,39 +19,53 @@ final class Figure {
       if (size == 4) {
          y = -1;
       }
-      for (int quar = 0 ; quar < size ; quar++) {
-         System.arraycopy(outer.dot[type][quar], 0, well[quar], 0, outer.dot[type][quar].length);
+      for (int i = 0 ; i < size ; i++) {
+         System.arraycopy(outer.dot[type][i], 0, well[i], 0, outer.dot[type][i].length);
       }
       createWell();
    }
 
    void createWell() {
-
-      for (int w = 0 ; w < size ; w++) {
-         for (int h = 0 ; h < size ; h++) {
-            if (well[h][w] == 1) {
-               figure.add(new Box(w + this.x, h + this.y, outer));
+      //создать фигуру ...
+      for (int width = 0 ; width < size ; width++) {
+         for (int height = 0 ; height < size ; height++) //проходим по массиву well и создаём нашу фигуру
+         {
+            if (well[height][width] == 1) {
+               figure.add(new Box(width + this.x, height + this.y, outer));
             }
          }
       }
    }
 
    boolean touchToWell() {
-      return figure.stream().anyMatch((box) -> (outer.getForm()[box.getY() + 1][box.getX()] > 0));
+      //коснулась ли фигура дна
+      for (Box box : figure) {
+         if (outer.getForm()[box.getY() + 1][box.getX()] > 0) {
+            return true;
+         }
+      }
+      return false;
    }
 
    boolean crossToWell() {
-      return figure.stream().anyMatch((box) -> (outer.getForm()[box.getY()][box.getX()] > 0));
+      //есть ли пространство для новой фигуры
+      for (Box box : figure) {
+         if (outer.getForm()[box.getY()][box.getX()] > 0) {
+            return true;
+         }
+      }
+      return false;
    }
 
    void fixToWell() {
-      figure.stream().forEach((box) -> {
+      //изменение цвета фигуры при фиксации
+      for (Box box : figure) {
          outer.getForm()[box.getY()][box.getX()] = color;
-      });
+      }
    }
 
    boolean widthToWell(int col) {
-
+      //проверка на косание фигурой стены LEFT,RIGHT...
       for (Box box : figure) {
          if (col == outer.LEFT && (box.getX() == 0 || outer.getForm()[box.getY()][box.getX() - 1] > 0)) {
             return true;
@@ -67,42 +78,43 @@ final class Figure {
    }
 
    void move(int col) {
-
+      //передвижение фигуры в право или лево
       if (!widthToWell(col)) {
          int dx = col - 38;
-         figure.stream().forEach((box) -> {
+         for (Box box : figure) {
             box.setX(box.getX() + dx);
-         });
+         }
          x += dx;
       }
    }
 
    void crossDown() {
-      figure.stream().forEach((box) -> {
+      //передвижение фигуры вниз
+      for (Box box : figure) {
          box.setY(box.getY() + 1);
-      });
+      }
       y++;
    }
 
    void drop() {
-
+      // падение в низ
       while (!touchToWell()) {
          crossDown();
       }
    }
 
    boolean collidesAt() {
-
-      for (int w = 0 ; w < size ; w++) {
-         for (int h = 0 ; h < size ; h++) {
-            if (well[h][w] == 1) {
-               if (h + this.y < 0) {
+      //(коллизии вращения фигуры)при проверке косания со стеной
+      for (int width = 0 ; width < size ; width++) {
+         for (int height = 0 ; height < size ; height++) {
+            if (well[height][width] == 1) {
+               if (height + this.y < 0) {
                   return true;
                }
-               if (w + this.x < 0 || w + this.x > outer.FORM_WIDTH - 1) {
+               if (width + this.x < 0 || width + this.x > outer.FORM_WIDTH - 1) {
                   return true;
                }
-               if (outer.getForm()[h + this.y][w + this.x] > 0) {
+               if (outer.getForm()[height + this.y][width + this.x] > 0) {
                   return true;
                }
             }
@@ -112,30 +124,30 @@ final class Figure {
    }
 
    void rotateWell(int col) {
-
-      for (int w = 0 ; w < size / 2 ; w++) {
-         for (int h = w ; h < size - 1 - w ; h++) {
+      // ротация образа фигуры
+      for (int i = 0 ; i < size / 2 ; i++) {
+         for (int j = i ; j < size - 1 - i ; j++) {
             if (col == outer.RIGHT) {
-
-               int tmp = well[size - 1 - h][w];
-               well[size - 1 - h][w] = well[size - 1 - w][size - 1 - h];
-               well[size - 1 - w][size - 1 - h] = well[h][size - 1 - w];
-               well[h][size - 1 - w] = well[w][h];
-               well[w][h] = tmp;
+               //по часовой стрелке
+               int tmp = well[size - 1 - j][i];
+               well[size - 1 - j][i] = well[size - 1 - i][size - 1 - j];
+               well[size - 1 - i][size - 1 - j] = well[j][size - 1 - i];
+               well[j][size - 1 - i] = well[i][j];
+               well[i][j] = tmp;
             } else {
-
-               int tmp = well[w][h];
-               well[w][h] = well[h][size - 1 - w];
-               well[h][size - 1 - w] = well[size - 1 - w][size - 1 - h];
-               well[size - 1 - w][size - 1 - h] = well[size - 1 - h][w];
-               well[size - 1 - h][w] = tmp;
+               //против часовой стрелки
+               int tmp = well[i][j];
+               well[i][j] = well[j][size - 1 - i];
+               well[j][size - 1 - i] = well[size - 1 - i][size - 1 - j];
+               well[size - 1 - i][size - 1 - j] = well[size - 1 - j][i];
+               well[size - 1 - j][i] = tmp;
             }
          }
       }
    }
 
    void rotate() {
-
+      //вращение фигуры(ротация)
       rotateWell(outer.RIGHT);
       if (!collidesAt()) {
          figure.clear();
@@ -146,9 +158,9 @@ final class Figure {
    }
 
    void paint(Graphics g) {
-      figure.stream().forEach((Box box) -> {
+      for (Box box : figure) {
          box.paint(g, color);
-      });
+      }
    }
-
+   
 }

@@ -1,5 +1,3 @@
-package src;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.KeyAdapter;
@@ -8,34 +6,33 @@ import java.util.Arrays;
 import java.util.Random;
 import javax.swing.JFrame;
 
-@SuppressWarnings("serial")
 public class Tetris extends JFrame {
 
-   final String Title = "tetris";
-   final int BOX_SIZE = 25;
-   final int ARC = 6;
-   final int FORM_WIDTH = 10;
-   final int FORM_HEIGHT = 21;
-   final int DX = 7;
-   final int DY = 26;
-   final int RUN = 180;
-   final int LEFT = 37;
-   final int UP = 38;
-   final int RIGHT = 39;
-   final int DOWN = 40;
-   final int SHOW_DEL = 400;
+   final String Title = "Tetris";
+   final int BOX_SIZE = 25;  //размер одного блока
+   final int ARC = 6;      //радиус закругления блока
+   final int FORM_WIDTH = 10;   //размер игрового поля  width
+   final int FORM_HEIGHT = 21; //размер игрового поля height
+   final int RUN = 180;     //стартовая локация
+   final int DX = 7;         //new X
+   final int DY = 26;       //new Y
+   final int LEFT = 37;    //коды клавиш 
+   final int UP = 38;     //коды клавиш 
+   final int RIGHT = 39; //коды клавиш
+   final int DOWN = 40; //коды клавиш
+   final int SHOW_DEL = 400;    //задержка анимации
    final int[][][] dot = {
-      {{0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {4, 0x00f0f0}},
-      {{0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {4, 0xf0f000}},
-      {{1, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0x0000f0}},
-      {{0, 0, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0xf0a000}},
-      {{0, 1, 1, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0x00f000}},
-      {{1, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0xa000f0}},
-      {{1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0xf00000}}
+      {{0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {4, 0x00f0f0}}, // I
+      {{0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {4, 0xf0f000}}, // O
+      {{1, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0x0000f0}}, // J
+      {{0, 0, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0xf0a000}}, // L
+      {{0, 1, 1, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0x00f000}}, // S
+      {{1, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0xa000f0}}, // T
+      {{1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0xf00000}} // Z
    };
-   final int[] score = {100, 300, 700, 1500};
+   final int[] score = {155, 355, 755, 1555};
    private int gameScore = 0;
-   private int[][] form = new int[FORM_HEIGHT + 1][FORM_WIDTH];
+   private int[][] form = new int[FORM_HEIGHT + 1][FORM_WIDTH];  // игровое поле form
    private JFrame frame;
    private Canvas canvas = new Canvas(this);
    private Random random = new Random();
@@ -57,6 +54,7 @@ public class Tetris extends JFrame {
    };
 
    public static void main(String[] args) {
+
       new Tetris().init();
    }
 
@@ -64,24 +62,21 @@ public class Tetris extends JFrame {
       setTitle(Title);
       setDefaultCloseOperation(EXIT_ON_CLOSE);
       setBounds(RUN, RUN, FORM_WIDTH * BOX_SIZE + DX, FORM_HEIGHT * BOX_SIZE + DY);
-      setResizable(false);
-      setLocationRelativeTo(null);
-      canvas.setBackground(Color.black);
+      setResizable(false);                 //не изменять размер игрового поля
+      setLocationRelativeTo(null);        //игра в центре экрана
+      canvas.setBackground(Color.black); //цвет фона
       addKeyListener(new KeyAdapter() {
          @Override
          public void keyPressed(KeyEvent e) {
             if (!isOverGame()) {
-               if (e.getKeyCode() == LEFT) {
-                  getFigure().move(e.getKeyCode());
-               }
-               if (e.getKeyCode() == RIGHT) {
-                  getFigure().move(e.getKeyCode());
+               if (e.getKeyCode() == DOWN) {
+                  getFigure().drop();
                }
                if (e.getKeyCode() == UP) {
                   getFigure().rotate();
                }
-               if (e.getKeyCode() == DOWN) {
-                  getFigure().drop();
+               if (e.getKeyCode() == LEFT || e.getKeyCode() == RIGHT) {
+                  getFigure().move(e.getKeyCode());
                }
             }
             getCanvas().repaint();
@@ -89,29 +84,29 @@ public class Tetris extends JFrame {
       });
       add(BorderLayout.CENTER, canvas);
       setVisible(true);
-      Arrays.fill(form[FORM_HEIGHT], 1);
+      Arrays.fill(form[FORM_HEIGHT], 1); //инициализация дна...создаём площадку дна
    }
 
    void init() {
-      while (!isOverGame()) {
-         try {
+      while (!isOverGame()) {  // пока неОверГейм(!overGame) крутится цикл while
+         try {          // задержка анимации...перед перерисовкой
             Thread.sleep(SHOW_DEL);
          } catch (InterruptedException e) {
          }
-         getCanvas().repaint();
-         curentString();
-         if (getFigure().touchToWell()) {
-            getFigure().fixToWell();
-            setFigure(new Figure(this));
-            setOverGame(getFigure().crossToWell());
+         getCanvas().repaint();   //перерисовка
+         curentString();    //проверка заполнения строк
+         if (getFigure().touchToWell()) { // коснулась ли фигура дна или упавших фигур
+            getFigure().fixToWell();         //фиксируем(изменяем цвет фигуры)после касания
+            setFigure(new Figure(this));     //создаем новую фигуру
+            setOverGame(getFigure().crossToWell()); //Есть ли пространство для новой фигуры, не закончилась ли игра
 
          } else {
-            getFigure().crossDown();
+            getFigure().crossDown(); //фигура продолжает падать
          }
       }
    }
 
-   void curentString() {
+   void curentString() {        //проверка заполнения строк
       int height = FORM_HEIGHT - 1;
       int curentHeight = 0;
       while (height > 0) {
@@ -121,8 +116,8 @@ public class Tetris extends JFrame {
          }
          if (curent > 0) {
             curentHeight++;
-            for (int h = height ; h > 0 ; h--) {
-               System.arraycopy(getForm()[h - 1], 0, getForm()[h], 0, FORM_WIDTH);
+            for (int quar = height ; quar > 0 ; quar--) {
+               System.arraycopy(getForm()[quar - 1], 0, getForm()[quar], 0, FORM_WIDTH);
             }
          } else {
             height--;
@@ -135,73 +130,17 @@ public class Tetris extends JFrame {
    }
 
    /**
-    * @return the overGame
+    * @return the gameScore
     */
-   public boolean isOverGame() {
-      return overGame;
+   public int getGameScore() {
+      return gameScore;
    }
 
    /**
-    * @param overGame the overGame to set
+    * @param gameScore the gameScore to set
     */
-   public void setOverGame(boolean overGame) {
-      this.overGame = overGame;
-   }
-
-   /**
-    * @return the figure
-    */
-   public Figure getFigure() {
-      return figure;
-   }
-
-   /**
-    * @param figure the figure to set
-    */
-   public void setFigure(Figure figure) {
-      this.figure = figure;
-   }
-
-   /**
-    * @return the random
-    */
-   public Random getRandom() {
-      return random;
-   }
-
-   /**
-    * @param random the random to set
-    */
-   public void setRandom(Random random) {
-      this.random = random;
-   }
-
-   /**
-    * @return the canvas
-    */
-   public Canvas getCanvas() {
-      return canvas;
-   }
-
-   /**
-    * @param canvas the canvas to set
-    */
-   public void setCanvas(Canvas canvas) {
-      this.canvas = canvas;
-   }
-
-   /**
-    * @return the frame
-    */
-   public JFrame getFrame() {
-      return frame;
-   }
-
-   /**
-    * @param frame the frame to set
-    */
-   public void setFrame(JFrame frame) {
-      this.frame = frame;
+   public void setGameScore(int gameScore) {
+      this.gameScore = gameScore;
    }
 
    /**
@@ -219,17 +158,75 @@ public class Tetris extends JFrame {
    }
 
    /**
-    * @return the gameScore
+    * @return the frame
     */
-   public int getGameScore() {
-      return gameScore;
+   public JFrame getFrame() {
+      return frame;
    }
 
    /**
-    * @param gameScore the gameScore to set
+    * @param frame the frame to set
     */
-   public void setGameScore(int gameScore) {
-      this.gameScore = gameScore;
+   public void setFrame(JFrame frame) {
+      this.frame = frame;
    }
+
+   /**
+    * @return the canvas
+    */
+   public Canvas getCanvas() {
+      return canvas;
+   }
+
+   /**
+    * @param canvas the canvas to set
+    */
+   public void setCanvas(Canvas canvas) {
+      this.canvas = canvas;
+   }
+
+   /**
+    * @return the random
+    */
+   public Random getRandom() {
+      return random;
+   }
+
+   /**
+    * @param random the random to set
+    */
+   public void setRandom(Random random) {
+      this.random = random;
+   }
+
+   /**
+    * @return the figure
+    */
+   public Figure getFigure() {
+      return figure;
+   }
+
+   /**
+    * @param figure the figure to set
+    */
+   public void setFigure(Figure figure) {
+      this.figure = figure;
+   }
+
+   /**
+    * @return the overGame
+    */
+   public boolean isOverGame() {
+      return overGame;
+   }
+
+   /**
+    * @param overGame the overGame to set
+    */
+   public void setOverGame(boolean overGame) {
+      this.overGame = overGame;
+   }
+
+
 
 }

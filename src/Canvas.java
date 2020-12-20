@@ -1,12 +1,8 @@
-package src;
-
 import java.awt.Color;
 import java.awt.Graphics;
 import javax.swing.JPanel;
 
-@SuppressWarnings("serial")
 class Canvas extends JPanel {
-
    private final Tetris outer;
 
    Canvas(final Tetris outer) {
@@ -16,25 +12,25 @@ class Canvas extends JPanel {
    @Override
    public void paint(Graphics g) {
       super.paint(g);
-      for (int w = 0 ; w < outer.FORM_WIDTH ; w++) {
-         for (int h = 0 ; h < outer.FORM_HEIGHT ; h++) {
-            if (w < outer.FORM_WIDTH - 1 && h < outer.FORM_HEIGHT - 1) {
+      for (int x = 0 ; x < outer.FORM_WIDTH ; x++) {
+         for (int y = 0 ; y < outer.FORM_HEIGHT ; y++) {
+            if (x < outer.FORM_WIDTH - 1 && y < outer.FORM_HEIGHT - 1) {
                g.setColor(Color.lightGray);
-               g.drawLine((w + 1) * outer.BOX_SIZE - 2, (h + 1) * outer.BOX_SIZE, (w + 1) * outer.BOX_SIZE + 2, (h + 1) * outer.BOX_SIZE);
-               g.drawLine((w + 1) * outer.BOX_SIZE, (h + 1) * outer.BOX_SIZE - 2, (w + 1) * outer.BOX_SIZE, (h + 1) * outer.BOX_SIZE + 2);
+               g.drawLine((x + 1) * outer.BOX_SIZE - 2, (y + 1) * outer.BOX_SIZE, (x + 1) * outer.BOX_SIZE + 2, (y + 1) * outer.BOX_SIZE);
+               g.drawLine((x + 1) * outer.BOX_SIZE, (y + 1) * outer.BOX_SIZE - 2, (x + 1) * outer.BOX_SIZE, (y + 1) * outer.BOX_SIZE + 2);
             }
-            if (outer.getForm()[h][w] > 0) {
-               g.setColor(new Color(outer.getForm()[h][w]));
-               g.fill3DRect(w * outer.BOX_SIZE + 1, h * outer.BOX_SIZE + 1, outer.BOX_SIZE - 1, outer.BOX_SIZE - 1, true);
+            if (outer.getForm()[y][x] > 0) {
+               g.setColor(new Color(outer.getForm()[y][x]));
+               g.fill3DRect(x * outer.BOX_SIZE + 1, y * outer.BOX_SIZE + 1, outer.BOX_SIZE - 1, outer.BOX_SIZE - 1, true);
             }
          }
       }
       if (outer.isOverGame()) {
          g.setColor(Color.white);
-         for (int h = 0 ; h < outer.MSG.length ; h++) {
-            for (int w = 0 ; w < outer.MSG[h].length ; w++) {
-               if (outer.MSG[h][w] == 1) {
-                  g.fill3DRect(w * 11 + 18, h * 11 + 160, 10, 10, true);
+         for (int y = 0 ; y < outer.MSG.length ; y++) {
+            for (int x = 0 ; x < outer.MSG[y].length ; x++) {
+               if (outer.MSG[y][x] == 1) {
+                  g.fill3DRect(x * 11 + 18, y * 11 + 160, 10, 10, true);
                }
             }
          }
@@ -42,5 +38,5 @@ class Canvas extends JPanel {
          outer.getFigure().paint(g);
       }
    }
-
+   
 }
