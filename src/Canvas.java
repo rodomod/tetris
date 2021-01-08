@@ -14,7 +14,7 @@ public class Canvas extends JPanel {
         for (int x = 0; x < out.FORM_WIDTH; x++) {
             for (int y = 0; y < out.FORM_HEIGHT; y++) {
                 if (x < out.FORM_WIDTH - 1 && y < out.FORM_HEIGHT - 1) {
-                    g.setColor(Color.lightGray);
+                    g.setColor(Color.pink);
                     g.drawLine((x + 1) * out.BOX_SIZE - 2, (y + 1) * out.BOX_SIZE, (x + 1) * out.BOX_SIZE + 2, (y + 1) * out.BOX_SIZE);
                     g.drawLine((x + 1) * out.BOX_SIZE, (y + 1) * out.BOX_SIZE - 2, (x + 1) * out.BOX_SIZE, (y + 1) * out.BOX_SIZE + 2);
                 }
